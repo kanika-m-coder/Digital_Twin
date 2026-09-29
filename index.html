@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Antarctic Station Digital Twin – Maitri & Bharati</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07121f;--bg2:#0b1b2e;--card:rgba(20,44,72,.55);--line:rgba(150,205,240,.16);--tx:#e6f2fb;--mut:#8fa9c0;--ice:#7fd3f7;--ice2:#bfe9ff;--ok:#5fd6a5;--warn:#f2c14e;--bad:#f2766b;--sim:#c4a7ff;--ref:#7fd3f7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#eef5fb;--bg2:#fff;--card:rgba(255,255,255,.85);--line:rgba(20,60,100,.16);--tx:#0d2238;--mut:#4d6a85;--ice:#0f79b3;--ice2:#0b5f8f;--sim:#6b45c9;--ref:#0f79b3}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font:15px/1.5 Figtree,system-ui,sans-serif;
+background-image:radial-gradient(900px 500px at 85% -10%,rgba(127,211,247,.13),transparent),radial-gradient(700px 400px at 0% 100%,rgba(70,120,190,.14),transparent)}
+h1,h2,h3{font-family:'Bricolage Grotesque',Figtree,sans-serif;margin:0;letter-spacing:-.01em}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+nav{background:var(--bg2);border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 18px}
+.brand b{font:700 15px 'Bricolage Grotesque';line-height:1.15}
+.brand small{color:var(--mut);display:block;font-size:11px}
+nav button{display:flex;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--mut);padding:10px;border-radius:10px;font:500 14px Figtree;cursor:pointer;text-align:left}
+nav button:hover{background:rgba(127,211,247,.08);color:var(--tx)}
+nav button.on{background:rgba(127,211,247,.15);color:var(--ice2)}
+nav button:focus-visible,.seg button:focus-visible,.btn:focus-visible,.thumb:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+main{padding:22px clamp(14px,3vw,34px) 40px;min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;margin-bottom:18px}
+.top h1{font-size:clamp(20px,3vw,28px)}
+.top p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.seg button{background:none;border:0;color:var(--mut);padding:8px 16px;font:600 14px Figtree;cursor:pointer}
+.seg button.on{background:var(--ice);color:#04131f}
+.btn{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:8px 12px;font:500 13px Figtree;cursor:pointer}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(10px);min-width:0}
+.card h3{font-size:16px;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.kpi .v{font:700 30px 'Bricolage Grotesque';margin:4px 0}
+.kpi .l{color:var(--mut);font-size:13px}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid;font-weight:600;white-space:nowrap}
+.tag.sim{color:var(--sim);border-color:var(--sim)}.tag.ref{color:var(--ref);border-color:var(--ref)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.bar{height:8px;background:rgba(127,211,247,.12);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ice);border-radius:9px;transition:width .8s}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.row:last-child{border:0}
+.row span:first-child{color:var(--mut)}
+.view{display:none}.view.on{display:block}
+.twin{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(#0d2440,#0a1a2e 70%,#dbeaf5 70%);margin-bottom:14px}
+:root[data-theme="light"] .twin{background:linear-gradient(#cfe6f6,#e8f3fb 70%,#fff 70%)}
+.twin svg{display:block;width:100%;height:auto;max-height:330px}
+.twin .cap{position:absolute;left:14px;top:12px;font-size:12px;color:var(--mut)}
+.node{cursor:pointer}.node rect,.node path{transition:.2s}.node:hover rect,.node:hover path{stroke:var(--ice2);stroke-width:2}
+.tip{position:absolute;right:12px;bottom:12px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;max-width:230px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600}
+.scroll{overflow-x:auto}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow span.n{background:rgba(127,211,247,.12);border:1px solid var(--line);padding:6px 10px;border-radius:9px}
+.flow span.a{color:var(--mut)}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+.shot{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg2)}
+.shot img{width:100%;height:190px;object-fit:contain;background:#000;display:block;cursor:zoom-in}
+.shot .m{padding:10px 12px;font-size:12.5px;color:var(--mut)}
+.slot{border:1.5px dashed var(--line);border-radius:14px;padding:26px 14px;text-align:center;color:var(--mut);font-size:13.5px}
+.note{font-size:12.5px;color:var(--mut);border-left:3px solid var(--ice);padding:8px 12px;background:rgba(127,211,247,.06);border-radius:0 10px 10px 0}
+#lb{position:fixed;inset:0;background:rgba(2,8,15,.92);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+#lb.on{display:flex}#lb img{max-width:100%;max-height:100%}
+.alert{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.alert:last-child{border:0}
+.mob{display:none}
+@media(max-width:820px){
+.app{grid-template-columns:1fr}
+nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;z-index:20;display:flex;overflow-x:auto;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line)}
+nav .brand{display:none}nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 10px;width:auto;flex:1 0 auto;align-items:center}
+main{padding-bottom:90px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pulse{50%{opacity:.35}}.live{animation:pulse 2s infinite}
+</style>
+</head>
+<body>
+<div class="app">
+<nav aria-label="Main">
+ <div class="brand"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#7fd3f7" stroke-width="1.8"><path d="M15 3v24M4.5 9l21 12M25.5 9l-21 12M11 5l4 3 4-3M11 25l4-3 4 3"/></svg><div><b>Antarctic Twin</b><small>Maitri &amp; Bharati</small></div></div>
+ <button data-v="overview" class="on">◈ Overview</button>
+ <button data-v="infra">▦ Infrastructure</button>
+ <button data-v="energy">⚡ Energy</button>
+ <button data-v="logistics">⛟ Logistics</button>
+ <button data-v="env">❄ Environment</button>
+ <button data-v="source">⛁ Data Source</button>
+</nav>
+<main>
+ <div class="top">
+  <div><h1 id="ttl">Station Overview</h1><p id="sub"></p></div>
+  <div class="ctl">
+   <div class="seg" role="group" aria-label="Station"><button id="sM" class="on">Maitri</button><button id="sB">Bharati</button></div>
+   <button class="btn" id="theme">Light / Dark</button>
+   <div id="op-profile" class="btn" style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px;" title="Logged-in Operator Profile">
+    <span class="dot" style="background:var(--ok)"></span>
+    <span id="op-name" style="font-weight:600">Operator</span>
+    <span id="op-badge" class="tag ref" style="font-size:10px;padding:1px 6px">Portal</span>
+    <a href="login.html" id="logout-link" style="color:var(--mut);text-decoration:none;font-size:12px;margin-left:4px;padding:2px 4px;border-radius:4px" title="Sign Out / Switch Operator">✕ Sign Out</a>
+   </div>
+  </div>
+ </div>
+
+ <section class="view on" id="v-overview">
+  <div class="twin">
+   <div class="cap"><span class="live">●</span> Virtual twin of <span id="tn">Maitri</span> · <span class="tag sim">Prototype Simulated Data</span></div>
+   <svg viewBox="0 0 800 330" role="img" aria-label="Schematic station site plan">
+    <path d="M0 230 Q200 210 400 225 T800 220 V330 H0Z" fill="none"/>
+    <g class="node" data-n="Main Living Module" data-s="Nominal · 21 °C indoors"><rect x="300" y="150" width="200" height="70" rx="10" fill="#1d4a78" stroke="#7fd3f7"/><text x="400" y="190" fill="#e6f2fb" text-anchor="middle" font-size="14">Living &amp; Lab Module</text></g>
+    <g class="node" data-n="Power House" data-s="Generators + battery bank"><rect x="130" y="170" width="120" height="50" rx="8" fill="#5a3f1c" stroke="#f2c14e"/><text x="190" y="200" fill="#fff" text-anchor="middle" font-size="13">Power House</text></g>
+    <g class="node" data-n="Fuel Store" data-s="Tank level simulated"><rect x="560" y="180" width="110" height="40" rx="8" fill="#4a2a38" stroke="#f2766b"/><text x="615" y="205" fill="#fff" text-anchor="middle" font-size="13">Fuel Store</text></g>
+    <g class="node" data-n="Comms Mast" data-s="SATCOM link"><path d="M700 220V110M680 130l20-20 20 20M685 150h30M690 170h20" stroke="#5fd6a5" fill="none" stroke-width="3"/><text x="700" y="100" fill="#5fd6a5" text-anchor="middle" font-size="12">Comms</text></g>
+    <g class="node" data-n="Met Station" data-s="Sensors: T, wind, pressure, RH"><path d="M80 220V140M60 150h40M70 165h20" stroke="#7fd3f7" fill="none" stroke-width="3"/><circle cx="80" cy="135" r="6" fill="#7fd3f7"/><text x="80" y="120" fill="#7fd3f7" text-anchor="middle" font-size="12">Met</text></g>
+    <g class="node" data-n="Helipad / Logistics Yard" data-s="Cargo staging area"><rect x="330" y="255" width="140" height="45" rx="8" fill="#eaf4fb" stroke="#7fd3f7" opacity=".9"/><text x="400" y="283" fill="#0d2238" text-anchor="middle" font-size="13">Logistics Yard</text></g>
+    <path d="M250 195H300M500 200H560M400 220V255" stroke="#7fd3f7" stroke-dasharray="4 4" fill="none"/>
+   </svg>
+   <div class="tip" id="tip"><b>Select a component</b><br><span style="color:var(--mut)">Tap any building to inspect its twin state.</span></div>
+  </div>
+  <div class="grid g4" id="kpis"></div>
+  <div class="grid g2" style="margin-top:14px">
+   <div class="card"><h3>Station health <span class="tag sim">Prototype Simulated Data</span></h3><div id="health"></div></div>
+   <div class="card"><h3>Alerts &amp; anomalies <span class="tag sim">Prototype Simulated Data</span></h3><div id="alerts"></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>How the twin works</h3>
+   <div class="flow"><span class="n">Sensors &amp; datasets</span><span class="a">→</span><span class="n">Data processing</span><span class="a">→</span><span class="n">Backend API</span><span class="a">→</span><span class="n">Digital twin state</span><span class="a">→</span><span class="n">AI / ML analytics</span><span class="a">→</span><span class="n">Remote dashboard</span></div></div>
+ </section>
+
+ <section class="view" id="v-infra">
+  <div class="grid g2">
+   <div class="card"><h3>Buildings &amp; systems <span class="tag sim">Prototype Simulated Data</span></h3><div id="infra"></div></div>
+   <div class="card"><h3>Maintenance planner <span class="tag sim">Prototype Simulated Data</span></h3><div id="maint"></div></div>
+  </div>
+ </section>
+
+ <section class="view" id="v-energy">
+  <div class="grid g4" id="ekpi"></div>
+  <div class="grid g2" style="margin-top:14px">
+   <div class="card"><h3>Load vs. generation, last 24 h <span class="tag sim">Prototype Simulated Data</span></h3><svg id="chart" viewBox="0 0 400 180" style="width:100%"></svg></div>
+   <div class="card"><h3>Generators &amp; storage <span class="tag sim">Prototype Simulated Data</span></h3><div id="gens"></div></div>
+  </div>
+ </section>
+
+ <section class="view" id="v-logistics">
+  <div class="grid g2">
+   <div class="card"><h3>Supply inventory <span class="tag sim">Prototype Simulated Data</span></h3><div id="inv"></div></div>
+   <div class="card"><h3>Shipments <span class="tag sim">Prototype Simulated Data</span></h3><div class="scroll"><table id="ship"></table></div></div>
+  </div>
+ </section>
+
+ <section class="view" id="v-env">
+  <div class="note" style="margin-bottom:14px" id="envnote"></div>
+  <div class="grid g4" id="envk"></div>
+  <div class="card" style="margin-top:14px"><h3>Environment → twin pipeline</h3>
+   <div class="flow"><span class="n">Temperature / wind / pressure</span><span class="a">→</span><span class="n">Data processing</span><span class="a">→</span><span class="n">Environmental state</span><span class="a">→</span><span class="n">Digital twin</span><span class="a">→</span><span class="n">AI prediction</span><span class="a">→</span><span class="n">Anomaly detection</span><span class="a">→</span><span class="n">Station health</span></div></div>
+ </section>
+
+ <section class="view" id="v-source">
+  <div class="grid g2">
+   <div class="card"><h3>Data source details <span class="tag ref">Public Dataset / Reference Data</span></h3>
+    <div class="row"><span>Data source</span><span>NCPOR / NPDC</span></div>
+    <div class="row"><span>Station</span><span id="dsS">Maitri</span></div>
+    <div class="row"><span>Data type</span><span>Environmental / Meteorological</span></div>
+    <div class="row"><span>Data status</span><span>Reference Dataset</span></div>
+    <div class="row"><span>Integration status</span><span>Prototype Integration</span></div></div>
+   <div class="card"><h3>Data classification</h3>
+    <p style="margin:0 0 8px"><span class="tag ref">NCPOR/NPDC Reference Data</span> Temperature, wind speed, pressure, humidity and other parameters present in the uploaded dataset.</p>
+    <p style="margin:0"><span class="tag sim">Prototype Simulated Data</span> Generator status, battery level, power use, equipment health, communication status, maintenance condition.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>NCPOR / NPDC Data Source screenshots
+   <span><label class="btn" style="cursor:pointer">Add screenshot<input type="file" id="fimg" accept="image/*" multiple hidden></label></span></h3>
+   <div class="shots" id="shots"></div>
+   <p class="note" style="margin-top:12px">Screenshots are shown exactly as uploaded, unedited. They are reference data and do not represent live readings. Click an image to enlarge.</p></div>
+  <div class="card" style="margin-top:14px"><h3>NCPOR data preview <span><label class="btn" style="cursor:pointer">Load CSV<input type="file" id="fcsv" accept=".csv,text/csv" hidden></label></span></h3>
+   <div class="scroll" id="prev"><div class="slot">No dataset loaded. Upload a CSV exported from NCPOR/NPDC. Columns are created from the file. Nothing is filled in for missing parameters.</div></div></div>
+  <div class="card" style="margin-top:14px"><h3>Data flow</h3>
+   <div class="flow"><span class="n">NCPOR / NPDC dataset</span><span class="a">→</span><span class="n">Data processing</span><span class="a">→</span><span class="n">Backend API</span><span class="a">→</span><span class="n">Digital twin</span><span class="a">→</span><span class="n">AI / ML analytics</span><span class="a">→</span><span class="n">Dashboard</span></div>
+   <p style="margin:10px 0 0;color:var(--mut);font-size:13.5px">Publicly available NCPOR/NPDC datasets are used as the environmental data layer of the prototype. Operational station parameters are simulated for demonstration.</p></div>
+  <p class="note" style="margin-top:14px">Note: NCPOR/NPDC reference datasets are used for prototype demonstration. The current prototype does not claim direct live access to restricted or real-time NCPOR systems. Live station telemetry can be integrated through authorized data interfaces during deployment.</p>
+ </section>
+</main>
+</div>
+<div id="lb" role="dialog" aria-label="Enlarged screenshot"><img alt=""></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const D={
+ Maitri:{loc:"Schirmacher Oasis · 70.77°S 11.73°E",pop:38,gen:["DG-1 · Running","DG-2 · Standby","DG-3 · Standby"],base:{pwr:62,bat:81,heat:88,com:96}},
+ Bharati:{loc:"Larsemann Hills · 69.41°S 76.19°E",pop:47,gen:["DG-1 · Running","DG-2 · Running","DG-3 · Standby"],base:{pwr:74,bat:69,heat:92,com:91}}};
+let st="Maitri",view="overview",t=0;
+const store={Maitri:{imgs:[],csv:null},Bharati:{imgs:[],csv:null}};
+const titles={overview:"Station Overview",infra:"Infrastructure",energy:"Energy Management",logistics:"Logistics",env:"Environmental Monitoring",source:"NCPOR / NPDC Data Source"};
+const j=(b,a)=>Math.round((b+Math.sin(t/3+b)*a)*10)/10;
+const sim='<span class="tag sim">Prototype Simulated Data</span>';
+function tag(v){return v>=85?'':v>=70?'warn':'bad'}
+function kp(l,v,u,x){return `<div class="card kpi"><div class="l">${l}</div><div class="v">${v}<small style="font-size:14px;color:var(--mut)"> ${u}</small></div><div class="bar"><i style="width:${Math.min(v,100)}%"></i></div><div style="margin-top:8px">${x||sim}</div></div>`}
+function render(){
+ const d=D[st],b=d.base;
+ $('#tn').textContent=st;$('#dsS').textContent=st;$('#ttl').textContent=titles[view];
+ $('#sub').textContent=`${st} station · ${d.loc}`;
+ $('#kpis').innerHTML=kp('Power consumption',j(b.pwr,6),'% of capacity')+kp('Battery level',j(b.bat,3),'%')+kp('Equipment health',j(b.heat,2),'%')+kp('Comms status',j(b.com,2),'% uptime');
+ const hs=[['Infrastructure',b.heat],['Energy',b.bat],['Logistics',84],['Communications',b.com]];
+ $('#health').innerHTML=hs.map(([n,v])=>`<div class="row"><span>${n}</span><span class="st"><i class="dot ${tag(v)}"></i>${v}%</span></div>`).join('');
+ $('#alerts').innerHTML=[['warn','Fuel reserve trending below seasonal target'],['ok','Backup generator self-test passed'],['bad','Snow load on cargo shelter roof above threshold']].map(([c,m])=>`<div class="alert"><i class="dot ${c=='ok'?'':c}" style="margin-top:6px;flex:none"></i><span>${m}</span></div>`).join('');
+ $('#infra').innerHTML=[['Living & Lab module',94],['Power house',b.heat],['Water & waste plant',86],['Heating system',91],['Fuel store',78],['Comms mast',b.com]].map(([n,v])=>`<div class="row"><span>${n}</span><span class="st"><i class="dot ${tag(v)}"></i>${v}%</span></div>`).join('');
+ $('#maint').innerHTML=[['Generator DG-1 oil change','In 6 days'],['Boiler inspection','In 14 days'],['Antenna alignment','In 3 weeks'],['Roof snow clearance','Overdue']].map(([n,v])=>`<div class="row"><span>${n}</span><span>${v}</span></div>`).join('');
+ $('#ekpi').innerHTML=kp('Generation',j(b.pwr+12,4),'kW')+kp('Load',j(b.pwr,5),'% capacity')+kp('Battery',j(b.bat,3),'%')+kp('Fuel reserve',j(58,2),'%');
+ $('#gens').innerHTML=d.gen.map(g=>{const[n,s]=g.split(' · ');return `<div class="row"><span>${n}</span><span class="st"><i class="dot ${s=='Running'?'':'warn'}"></i>${s}</span></div>`}).join('')+`<div class="row"><span>Battery bank</span><span>${j(b.bat,3)}%</span></div>`;
+ drawChart();
+ $('#inv').innerHTML=[['Diesel (kL)',72],['Food stores',81],['Spare parts',63],['Medical supplies',90]].map(([n,v])=>`<div style="margin:10px 0"><div class="row" style="border:0;padding:0 0 4px"><span>${n}</span><span>${v}%</span></div><div class="bar"><i style="width:${v}%"></i></div></div>`).join('');
+ $('#ship').innerHTML='<tr><th>Item</th><th>Route</th><th>Status</th></tr>'+[['Fuel drums','Cape Town → Ship','In transit'],['Spare gearbox','Goa → Ship','Scheduled'],['Fresh provisions','Ship → Station','Delayed']].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+ renderEnv();renderSource();
+}
+function drawChart(){
+ const p=(o,ph)=>Array.from({length:24},(_,i)=>{const y=150-(50+o+22*Math.sin(i/3.8+ph))*1.1;return `${i*17+10},${y}`}).join(' ');
+ $('#chart').innerHTML=`<polyline fill="none" stroke="#7fd3f7" stroke-width="2.5" points="${p(D[st].base.pwr/3,0)}"/><polyline fill="none" stroke="#f2c14e" stroke-width="2.5" stroke-dasharray="5 4" points="${p(D[st].base.pwr/3-8,1.2)}"/><text x="10" y="172" fill="#8fa9c0" font-size="10">Generation (solid) · Load (dashed) · 0–24 h</text>`;
+}
+function renderEnv(){
+ const c=store[st].csv;
+ if(c){
+  $('#envnote').innerHTML='Showing values from the loaded NCPOR/NPDC dataset (latest row). <span class="tag ref">NCPOR/NPDC Reference Data</span>';
+  const last=c.rows[c.rows.length-1];
+  $('#envk').innerHTML=c.head.map((h,i)=>`<div class="card kpi"><div class="l">${h}</div><div class="v" style="font-size:24px">${last[i]||'–'}</div><span class="tag ref">NCPOR/NPDC Reference Data</span></div>`).join('');
+ }else{
+  $('#envnote').textContent='No NCPOR/NPDC dataset loaded for '+st+'. Open Data Source and load a CSV to show reference values here. No environmental values are shown until then.';
+  $('#envk').innerHTML='<div class="card slot" style="grid-column:1/-1">Waiting for reference dataset</div>';
+ }
+}
+function renderSource(){
+ const s=store[st];
+ $('#shots').innerHTML=s.imgs.length?s.imgs.map((im,i)=>`<figure class="shot" style="margin:0"><img src="${im.url}" alt="NCPOR screenshot ${i+1}" data-i="${i}"><figcaption class="m"><b style="color:var(--tx)">${st} · ${im.name}</b><br>Add parameter details from what is visible in the image.<br><span class="tag ref">Source: NCPOR / NPDC</span> <span class="tag ref">Public Dataset / Reference Data</span></figcaption></figure>`).join(''):`<div class="slot" style="grid-column:1/-1">No screenshots for ${st} yet. Use “Add screenshot” to upload the NCPOR/NPDC images. They are displayed unaltered.</div>`;
+ const c=s.csv;
+ $('#prev').innerHTML=c?`<table><tr>${c.head.map(h=>`<th>${h}</th>`).join('')}</tr>${c.rows.slice(0,15).map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table>`:'<div class="slot">No dataset loaded. Upload a CSV exported from NCPOR/NPDC. Columns are created from the file. Nothing is filled in for missing parameters.</div>';
+}
+function go(v){view=v;$$('.view').forEach(e=>e.classList.toggle('on',e.id=='v-'+v));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));render()}
+$$('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+function pick(s){st=s;$('#sM').classList.toggle('on',s=='Maitri');$('#sB').classList.toggle('on',s=='Bharati');render()}
+$('#sM').onclick=()=>pick('Maitri');$('#sB').onclick=()=>pick('Bharati');
+$('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme=='light'?'dark':'light'};
+$$('.node').forEach(n=>n.onclick=()=>{$('#tip').innerHTML=`<b>${n.dataset.n}</b><br><span style="color:var(--mut)">${n.dataset.s}</span><br>${sim}`});
+$('#fimg').onchange=e=>{[...e.target.files].forEach(f=>store[st].imgs.push({name:f.name,url:URL.createObjectURL(f)}));renderSource()};
+$('#fcsv').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const L=r.result.split(/\r?\n/).filter(x=>x.trim());const sp=x=>x.split(',').map(y=>y.trim().replace(/^"|"$/g,''));store[st].csv={head:sp(L[0]),rows:L.slice(1).map(sp)};render()};r.readAsText(f)};
+$('#shots').onclick=e=>{if(e.target.tagName=='IMG'){$('#lb img').src=e.target.src;$('#lb').classList.add('on')}};
+$('#lb').onclick=()=>$('#lb').classList.remove('on');
+document.onkeydown=e=>{if(e.key=='Escape')$('#lb').classList.remove('on')};
+try {
+ const sess = localStorage.getItem('antarctic_operator');
+ if (sess) {
+  const op = JSON.parse(sess);
+  if (op.name) $('#op-name').textContent = op.name;
+  if (op.role) $('#op-badge').textContent = op.role.replace('Station ', '').replace('Scientific ', '');
+  if (op.station && (op.station === 'Maitri' || op.station === 'Bharati')) {
+   st = op.station;
+   $('#sM').classList.toggle('on', st === 'Maitri');
+   $('#sB').classList.toggle('on', st === 'Bharati');
+  }
+ } else {
+  $('#op-name').textContent = 'Guest';
+  $('#op-badge').textContent = 'Demo';
+  $('#logout-link').textContent = 'Sign In';
+ }
+} catch(e) {}
+$('#logout-link').onclick = () => { localStorage.removeItem('antarctic_operator'); };
+
+setInterval(()=>{t++;if(view!='source'&&view!='env'){const y=window.scrollY;render();scrollTo(0,y)}},4000);
+render();
+</script>
+</body>
+</html>
